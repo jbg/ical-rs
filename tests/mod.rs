@@ -1,19 +1,18 @@
 
 #[cfg(feature = "line-parser")]
 pub mod line_parser {
-extern crate ical;
+    extern crate ical;
 
-use std::io::BufReader;
-use std::io::BufRead;
-use std::fs::File;
+    use std::io::BufReader;
+    use std::io::BufRead;
+    use std::fs::File;
 
-#[test]
+    #[test]
     fn ical() {
-        let input = BufReader::new(File::open("./tests/ressources/ical_input.ics")
-                                   .unwrap());
+        let input = BufReader::new(File::open("./tests/ressources/ical_input.ics").unwrap());
 
-        let mut valids = BufReader::new(File::open("./tests/ressources/ical_line_parser.res")
-                                        .unwrap()).lines();
+        let mut valids =
+            BufReader::new(File::open("./tests/ressources/ical_line_parser.res").unwrap()).lines();
 
 
         let reader = ical::LineParser::from_reader(input);
@@ -26,13 +25,12 @@ use std::fs::File;
     }
 
 
-#[test]
+    #[test]
     fn vcard() {
-        let input = BufReader::new(File::open("./tests/ressources/vcard_input.vcf")
-                                   .unwrap());
+        let input = BufReader::new(File::open("./tests/ressources/vcard_input.vcf").unwrap());
 
-        let mut valids = BufReader::new(File::open("./tests/ressources/vcard_line_parser.res")
-                                        .unwrap()).lines();
+        let mut valids =
+            BufReader::new(File::open("./tests/ressources/vcard_line_parser.res").unwrap()).lines();
 
 
         let reader = ical::LineParser::from_reader(input);
@@ -48,19 +46,18 @@ use std::fs::File;
 
 #[cfg(feature = "line-reader")]
 pub mod line_reader {
-extern crate ical;
+    extern crate ical;
 
-use std::io::BufReader;
-use std::io::BufRead;
-use std::fs::File;
+    use std::io::BufReader;
+    use std::io::BufRead;
+    use std::fs::File;
 
-#[test]
+    #[test]
     fn ical() {
-        let input = BufReader::new(File::open("./tests/ressources/ical_input.ics")
-                                   .unwrap());
+        let input = BufReader::new(File::open("./tests/ressources/ical_input.ics").unwrap());
 
-        let mut valids = BufReader::new(File::open("./tests/ressources/ical_line_reader.res")
-                                        .unwrap()).lines();
+        let mut valids =
+            BufReader::new(File::open("./tests/ressources/ical_line_reader.res").unwrap()).lines();
 
 
         let reader = ical::LineReader::new(input);
@@ -72,13 +69,12 @@ use std::fs::File;
         }
     }
 
-#[test]
+    #[test]
     fn vcard() {
-        let input = BufReader::new(File::open("./tests/ressources/vcard_input.vcf")
-                                   .unwrap());
+        let input = BufReader::new(File::open("./tests/ressources/vcard_input.vcf").unwrap());
 
-        let mut valids = BufReader::new(File::open("./tests/ressources/vcard_line_reader.res")
-                                        .unwrap()).lines();
+        let mut valids =
+            BufReader::new(File::open("./tests/ressources/vcard_line_reader.res").unwrap()).lines();
 
 
         let reader = ical::LineReader::new(input);

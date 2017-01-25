@@ -11,9 +11,7 @@ pub struct VcardContact {
 
 impl VcardContact {
     pub fn new() -> VcardContact {
-        VcardContact {
-            properties: Vec::new(),
-        }
+        VcardContact { properties: Vec::new() }
     }
 }
 

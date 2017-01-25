@@ -2,9 +2,9 @@
 
 use std::iter::Iterator;
 use std::io::BufRead;
-use std::error::Error;
 use std::fmt;
 
+use ParseError;
 use line::reader::{LineReader, Line};
 
 /// A parsed `Line`.
@@ -112,7 +112,9 @@ impl<B: BufRead> LineParser<B> {
     }
 
     /// Return the parameters from the given `Line`.
-    fn parse_parameters(&self, line: &str) -> Result<Option<Vec<(String, Vec<String>)>>, ParseError> {
+    fn parse_parameters(&self,
+                        line: &str)
+                        -> Result<Option<Vec<(String, Vec<String>)>>, ParseError> {
         let mut param_list = Vec::new();
         let mut params_str;
 
@@ -145,21 +147,23 @@ impl<B: BufRead> LineParser<B> {
 
             param_list.push((name.to_uppercase(), values));
 
-        };
+        }
 
         Ok(Some((param_list)))
     }
 }
 
-fn parse_param_value<'a>(mut values: Vec<String>, params_str: &'a str) -> Result<(Vec<String>, &'a str), ParseError> {
+fn parse_param_value<'a>(mut values: Vec<String>,
+                         params_str: &'a str)
+                         -> Result<(Vec<String>, &'a str), ParseError> {
     let new_params_str;
 
     if params_str.starts_with('"') {
         // This is a dquoted value. (NAME:Foo="Bar":value)
         let mut elements = params_str.splitn(3, '"').skip(1);
         values.push(elements.next()
-                    .and_then(|value| Some(value.to_string()))
-                    .ok_or(ParseError::InvalidParamFormat)?);
+            .and_then(|value| Some(value.to_string()))
+            .ok_or(ParseError::InvalidParamFormat)?);
         new_params_str = elements.next()
             .ok_or(ParseError::InvalidParamFormat)?;
     } else {
@@ -184,7 +188,8 @@ fn parse_param_value<'a>(mut values: Vec<String>, params_str: &'a str) -> Result
     }
 
     if new_params_str.starts_with(::PARAM_VALUE_DELIMITER) {
-        parse_param_value(values, new_params_str.trim_left_matches(::PARAM_VALUE_DELIMITER))
+        parse_param_value(values,
+                          new_params_str.trim_left_matches(::PARAM_VALUE_DELIMITER))
     } else {
         Ok((values, new_params_str))
     }
@@ -197,34 +202,5 @@ impl<B: BufRead> Iterator for LineParser<B> {
         self.line_reader
             .next()
             .map(|line| self.parse(line))
-    }
-}
-
-#[derive(Debug, PartialEq, Clone, Copy)]
-pub enum ParseError {
-    MissingValueDelimiter,
-    MissingName,
-    MissingValue,
-    InvalidParamFormat,
-}
-
-impl Error for ParseError {
-    fn description(&self) -> &str {
-        match *self {
-            ParseError::MissingValueDelimiter => "Missing value delimiter.",
-            ParseError::MissingName => "Missing name.",
-            ParseError::MissingValue => "Missing value.",
-            ParseError::InvalidParamFormat => "Invalid parameter format.",
-        }
-    }
-
-    fn cause(&self) -> Option<&Error> {
-        None
-    }
-}
-
-impl fmt::Display for ParseError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.description())
     }
 }
