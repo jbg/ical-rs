@@ -14,9 +14,7 @@ impl Write for StubFile {
     fn write(&mut self, buf: &[u8]) -> Result<usize> {
         let mut content = buf.clone();
 
-        let mut file_ref = self.line.borrow_mut();
-        file_ref.clear();
-        content.read_to_string(&mut file_ref)
+        content.read_to_string(&mut self.line.borrow_mut())
     }
 
     fn flush(&mut self) -> Result<()> {
@@ -114,10 +112,9 @@ pub mod property {
 pub mod line {
     extern crate ical;
 
-    use std::io::BufReader;
+    use std::io::{BufReader, BufRead, Read};
     use std::cell::RefCell;
     use std::rc::Rc;
-    use std::io::BufRead;
     use std::fs::File;
 
     use super::StubFile;
@@ -150,18 +147,27 @@ pub mod line {
 
         // Write
         let buf = Rc::new(RefCell::new(String::new()));
-        let mut writer = ical::LineWriter::new(StubFile::new(buf.clone()));
         let stub_file = StubFile::new(buf);
-        let mut res_write = BufReader::new(File::open("./tests/ressources/vcard_line_write.res").unwrap()).lines();
+        let mut writer = ical::LineWriter::new(stub_file.clone());
+        let mut res_write = BufReader::new(File::open("./tests/ressources/vcard_line_write.res").unwrap());
 
         for line in reader {
             // Check Reader.
             let output = format!("{:?}", line);
             assert_eq!(output, res_read.next().unwrap().unwrap());
 
-            // Check Writer.
+            // Run Writer.
             writer.write(&line).unwrap();
-            assert_eq!(res_write.next().unwrap().unwrap() + "\n", stub_file.line.borrow().as_str());
+        }
+
+        let mut buf_res = String::new();
+        res_write.read_to_string(&mut buf_res).unwrap();
+
+        let content_ref = stub_file.line.borrow();
+        let mut buf_out = content_ref.as_str().lines();
+
+        for line in buf_res.lines() {
+            assert_eq!(line, buf_out.next().unwrap());
         }
     }
 }

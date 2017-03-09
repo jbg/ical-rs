@@ -31,4 +31,6 @@ TEL;VALUE=uri;TYPE=home:tel:+33-01-23-45-67
 TITLE:Research Scientist
 TZ;VALUE=utc-offset:-0500
 XML:<html xmlns="http://www.w3.org/1999/xhtml"></html>
+ADR;TYPE=work:pobox;this is a verry long line; it exeed the 78 chars long; and
+  should be folded; and unfolded;zipcode;country
 END:VCARD

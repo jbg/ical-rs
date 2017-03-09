@@ -161,6 +161,11 @@ impl<B: BufRead> Iterator for LineReader<B> {
 }
 
 /// Take a struct implementing `Write` and write the folded `Line`.
+///
+/// There are two limits that this specification places on the number of
+/// characters in a line.  Each line of characters MUST be no more than
+/// 998 characters, and SHOULD be no more than 78 characters, excluding
+/// the CRLF.
 pub struct LineWriter<W> {
     writer: W
 }
@@ -175,9 +180,22 @@ impl<W: Write> LineWriter<W> {
 
     /// Write a `Line`.
     pub fn write(&mut self, line: &Line) -> Result<()> {
-        if line.inner.len() < 75 {
-            let content = line.inner.clone() + "\n";
+        let content = line.inner.clone() + "\n";
+
+        self.unfold(content)
+    }
+
+    fn unfold(&mut self, content: String) -> Result<()> {
+        if content.len() < 78 {
             self.writer.write(content.as_bytes())?;
+        } else {
+            let (start, end) = content.split_at(78);
+            self.writer.write(start.as_bytes())?;
+
+            // Add the newline and the first space indicating a line folded.
+            self.writer.write(b"\n ")?;
+
+            self.unfold(end.to_string())?;
         }
 
         Ok(())

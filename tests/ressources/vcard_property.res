@@ -31,5 +31,6 @@ Property { name: "TEL", params: Some([("VALUE", ["uri"]), ("TYPE", ["home"])]), 
 Property { name: "TITLE", params: None, value: Some("Research Scientist") }
 Property { name: "TZ", params: Some([("VALUE", ["utc-offset"])]), value: Some("-0500") }
 Property { name: "XML", params: None, value: Some("<html xmlns=\"http://www.w3.org/1999/xhtml\"></html>") }
+Property { name: "ADR", params: Some([("TYPE", ["work"])]), value: Some("pobox;this is a verry long line; it exeed the 78 chars long; and should be folded; and unfolded;zipcode;country") }
 Property { name: "END", params: None, value: Some("VCARD") }
 
