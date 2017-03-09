@@ -80,14 +80,6 @@ impl fmt::Display for Line {
     }
 }
 
-
-/// A trait generic for implementing line reading use by `PropertyParser`.
-pub trait LineRead {
-    /// Return the next line unwrapped and formated.
-    fn next_line(&mut self) -> Option<Line>;
-}
-
-
 #[derive(Debug, Clone, Default)]
 /// Take a `BufRead` and return the unfolded `Line`.
 pub struct LineReader<B> {
@@ -107,8 +99,10 @@ impl<B: BufRead> LineReader<B> {
     }
 }
 
-impl<B: BufRead> LineRead for LineReader<B> {
-    fn next_line(&mut self) -> Option<Line> {
+impl<B: BufRead> Iterator for LineReader<B> {
+    type Item = Line;
+
+    fn next(&mut self) -> Option<Line> {
         let mut next_line = String::new();
         let mut line_number: usize = 0;
 
@@ -158,13 +152,5 @@ impl<B: BufRead> LineRead for LineReader<B> {
         } else {
             Some(Line::new(next_line, line_number))
         }
-    }
-}
-
-impl<B: BufRead> Iterator for LineReader<B> {
-    type Item = Line;
-
-    fn next(&mut self) -> Option<Line> {
-        self.next_line()
     }
 }
