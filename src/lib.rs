@@ -61,3 +61,5 @@ pub use property::PropertyParser;
 pub mod line;
 #[cfg(feature = "line")]
 pub use line::LineReader;
+#[cfg(feature = "line")]
+pub use line::LineWriter;

@@ -1,4 +1,38 @@
 
+use std::io::Write;
+use std::io::Result;
+use std::io::Read;
+use std::rc::Rc;
+use std::cell::RefCell;
+
+#[derive(Clone, Debug)]
+struct StubFile {
+    pub line: Rc<RefCell<String>>
+}
+
+impl Write for StubFile {
+    fn write(&mut self, buf: &[u8]) -> Result<usize> {
+        let mut content = buf.clone();
+
+        let mut file_ref = self.line.borrow_mut();
+        file_ref.clear();
+        content.read_to_string(&mut file_ref)
+    }
+
+    fn flush(&mut self) -> Result<()> {
+        Ok(())
+    }
+}
+
+impl StubFile {
+    pub fn new(line: Rc<RefCell<String>>) -> Self {
+        StubFile {
+            line: line
+        }
+    }
+}
+
+
 #[cfg(feature = "property")]
 pub mod property {
     extern crate ical;
@@ -81,8 +115,12 @@ pub mod line {
     extern crate ical;
 
     use std::io::BufReader;
+    use std::cell::RefCell;
+    use std::rc::Rc;
     use std::io::BufRead;
     use std::fs::File;
+
+    use super::StubFile;
 
     #[test]
     fn ical() {
@@ -96,25 +134,34 @@ pub mod line {
 
         for line in reader {
             let output = format!("{:?}", line);
-
             assert_eq!(output, valids.next().unwrap().unwrap());
         }
     }
 
     #[test]
     fn vcard() {
+        // File Input.
         let input = BufReader::new(File::open("./tests/ressources/vcard_input.vcf").unwrap());
 
-        let mut valids = BufReader::new(File::open("./tests/ressources/vcard_line.res").unwrap())
+        // Read.
+        let mut res_read = BufReader::new(File::open("./tests/ressources/vcard_line_read.res").unwrap())
             .lines();
-
-
         let reader = ical::LineReader::new(input);
 
-        for line in reader {
-            let output = format!("{:?}", line);
+        // Write
+        let buf = Rc::new(RefCell::new(String::new()));
+        let mut writer = ical::LineWriter::new(StubFile::new(buf.clone()));
+        let stub_file = StubFile::new(buf);
+        let mut res_write = BufReader::new(File::open("./tests/ressources/vcard_line_write.res").unwrap()).lines();
 
-            assert_eq!(output, valids.next().unwrap().unwrap());
+        for line in reader {
+            // Check Reader.
+            let output = format!("{:?}", line);
+            assert_eq!(output, res_read.next().unwrap().unwrap());
+
+            // Check Writer.
+            writer.write(&line).unwrap();
+            assert_eq!(res_write.next().unwrap().unwrap() + "\n", stub_file.line.borrow().as_str());
         }
     }
 }

@@ -39,9 +39,14 @@
 //! }
 //! ```
 
+// Sys mods
 use std::iter::Iterator;
-use std::io::BufRead;
+use std::io::{BufRead, Write};
 use std::fmt;
+
+// Internal mods
+use self::errors::*;
+
 
 
 /// An unfolded raw line.
@@ -151,6 +156,47 @@ impl<B: BufRead> Iterator for LineReader<B> {
             None
         } else {
             Some(Line::new(next_line, line_number))
+        }
+    }
+}
+
+/// Take a struct implementing `Write` and write the folded `Line`.
+pub struct LineWriter<W> {
+    writer: W
+}
+
+impl<W: Write> LineWriter<W> {
+    /// Return a new `LineWriter`.
+    pub fn new(writer: W) -> Self {
+        LineWriter{
+            writer: writer
+        }
+    }
+
+    /// Write a `Line`.
+    pub fn write(&mut self, line: &Line) -> Result<()> {
+        if line.inner.len() < 75 {
+            let content = line.inner.clone() + "\n";
+            self.writer.write(content.as_bytes())?;
+        }
+
+        Ok(())
+    }
+}
+
+#[allow(missing_docs)]
+pub mod errors {
+    //! The Line errors
+
+    use std::io;
+
+    error_chain! {
+        types {
+            Error, ErrorKind, ResultExt, Result;
+        }
+
+        foreign_links {
+            Io(io::Error);
         }
     }
 }
