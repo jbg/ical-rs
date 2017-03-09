@@ -15,7 +15,7 @@ version = "0.4.0"
 
 [badges.travis-ci]
 branch = "master"
-repository = "https://travis-ci.org/Peltoche/ical-rs"
+repository = "Peltoche/ical-rs"
 
 
 
