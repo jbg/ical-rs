@@ -166,6 +166,7 @@ impl<B: BufRead> Iterator for LineReader<B> {
 /// characters in a line.  Each line of characters MUST be no more than
 /// 998 characters, and SHOULD be no more than 78 characters, excluding
 /// the CRLF.
+#[derive(Debug, Clone, Default)]
 pub struct LineWriter<W> {
     writer: W
 }

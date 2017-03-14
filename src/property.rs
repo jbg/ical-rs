@@ -39,11 +39,12 @@
 
 // Sys mods
 use std::iter::Iterator;
-use std::io::BufRead;
+use std::io::{BufRead, Write};
 use std::fmt;
 
 // Internal mods
 use line::{LineReader, Line};
+use line::{LineWriter};
 use property::errors::*;
 
 /// A VCARD/ICAL property.
@@ -241,6 +242,26 @@ impl<B: BufRead> Iterator for PropertyParser<B> {
         self.line_reader
             .next()
             .map(|line| self.parse(line))
+    }
+}
+
+/// Take a `LineWriter` and write the given `Property`.
+#[derive(Debug, Clone, Default)]
+pub struct PropertyWriter<W> {
+    line_writer: LineWriter<W>,
+}
+
+impl<W: Write> PropertyWriter<W> {
+    /// Return a new `PropertyWriter` from a `LineWriter`.
+    pub fn new(line_writer: LineWriter<W>) -> PropertyWriter<W> {
+        PropertyWriter{line_writer: line_writer}
+    }
+
+    /// Return a new `PropertyWriter` from a `Writer`.
+    pub fn from_writer(writer: W) -> PropertyWriter<W> {
+        let line_writer = LineWriter::new(writer);
+
+        PropertyWriter{line_writer: line_writer}
     }
 }
 
